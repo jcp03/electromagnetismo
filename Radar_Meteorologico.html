@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar Meteorológico — Punto 11</title>
+<style>
+:root{
+  --bg:#07101f;
+  --panel:#0d1a2d;
+  --panel2:#10223a;
+  --text:#eef6ff;
+  --muted:#a9bad0;
+  --cyan:#55d6ff;
+  --blue:#6c8cff;
+  --green:#59e6a7;
+  --yellow:#ffd166;
+  --orange:#ff9f43;
+  --red:#ff5d73;
+  --purple:#b388ff;
+  --line:rgba(255,255,255,.10);
+  --shadow:0 18px 55px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(85,214,255,.10), transparent 28rem),
+    radial-gradient(circle at 100% 15%, rgba(179,136,255,.08), transparent 24rem),
+    var(--bg);
+  color:var(--text);
+  line-height:1.6;
+}
+a{color:var(--cyan)}
+button,input{font:inherit}
+.wrap{width:min(1180px,92%);margin:auto}
+nav{
+  position:sticky;top:0;z-index:20;
+  backdrop-filter:blur(16px);
+  background:rgba(7,16,31,.78);
+  border-bottom:1px solid var(--line);
+}
+.navbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0}
+.brand{font-weight:800;letter-spacing:.03em;display:flex;align-items:center;gap:10px}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--cyan);box-shadow:0 0 22px var(--cyan)}
+.navlinks{display:flex;gap:9px;flex-wrap:wrap}
+.navlinks a{text-decoration:none;color:var(--muted);font-size:.87rem;padding:7px 10px;border-radius:10px}
+.navlinks a:hover{background:rgba(255,255,255,.06);color:white}
+.hero{
+  min-height:86vh;
+  display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;
+  padding:68px 0 50px;
+}
+.kicker{color:var(--cyan);font-weight:800;text-transform:uppercase;letter-spacing:.15em;font-size:.78rem}
+h1{font-size:clamp(3rem,7vw,6.4rem);line-height:.92;margin:.2em 0 .25em;letter-spacing:-.055em}
+h1 span{color:var(--cyan)}
+.lead{font-size:clamp(1.05rem,2vw,1.3rem);color:var(--muted);max-width:660px}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin:25px 0}
+.badge{border:1px solid var(--line);background:rgba(255,255,255,.04);padding:9px 12px;border-radius:999px;color:#d7e6f7;font-size:.9rem}
+.cta{display:inline-flex;align-items:center;gap:9px;background:var(--cyan);color:#04111f;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:800}
+.hero-visual{
+  aspect-ratio:1/1;border-radius:28px;position:relative;overflow:hidden;
+  border:1px solid var(--line);box-shadow:var(--shadow);
+  background:radial-gradient(circle at center, #0d2137 0 2%, #09192b 3% 30%, #07131f 70%);
+}
+.radar-grid{
+  position:absolute;inset:7%;border-radius:50%;
+  background:
+    radial-gradient(circle, transparent 0 24%, rgba(85,214,255,.18) 24.5% 25%, transparent 25.5% 49%, rgba(85,214,255,.18) 49.5% 50%, transparent 50.5% 74%, rgba(85,214,255,.18) 74.5% 75%, transparent 75.5%),
+    linear-gradient(90deg, transparent 49.7%, rgba(85,214,255,.18) 50%, transparent 50.3%),
+    linear-gradient(0deg, transparent 49.7%, rgba(85,214,255,.18) 50%, transparent 50.3%);
+  border:1px solid rgba(85,214,255,.24);
+}
+.sweep{
+  position:absolute;inset:7%;border-radius:50%;
+  background:conic-gradient(from 0deg, transparent 0 310deg, rgba(85,214,255,.02) 320deg, rgba(85,214,255,.48) 359deg, rgba(85,214,255,.75) 360deg);
+  animation:spin 4.2s linear infinite;
+  filter:drop-shadow(0 0 12px rgba(85,214,255,.35));
+}
+.echo{position:absolute;border-radius:50%;filter:blur(1px);opacity:.88;animation:pulseEcho 2.2s ease-in-out infinite alternate}
+.e1{width:19%;height:11%;left:59%;top:27%;background:radial-gradient(circle at 35% 45%,#ff5d73 0 18%,#ffd166 19% 42%,#59e6a7 43% 100%);transform:rotate(20deg)}
+.e2{width:14%;height:9%;left:30%;top:60%;background:radial-gradient(circle,#ffd166 0 30%,#59e6a7 31% 100%);transform:rotate(-22deg)}
+.e3{width:9%;height:7%;left:65%;top:63%;background:#59e6a7;opacity:.7}
+.radar-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:white;box-shadow:0 0 0 8px rgba(85,214,255,.15),0 0 25px var(--cyan)}
+.hero-label{position:absolute;left:24px;bottom:22px;padding:9px 12px;border-radius:12px;background:rgba(7,16,31,.75);border:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulseEcho{from{transform:scale(.93) rotate(20deg);opacity:.62}to{transform:scale(1.05) rotate(20deg);opacity:1}}
+
+section{padding:82px 0}
+.section-head{max-width:760px;margin-bottom:30px}
+.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.14em;font-weight:800;font-size:.76rem}
+h2{font-size:clamp(2rem,4vw,3.4rem);line-height:1.04;margin:.25em 0 .3em;letter-spacing:-.035em}
+.section-head p,.muted{color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{
+  background:linear-gradient(180deg,rgba(16,34,58,.92),rgba(11,25,43,.92));
+  border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);
+}
+.card h3{margin:6px 0 7px;font-size:1.06rem}
+.card p{color:var(--muted);margin:0;font-size:.95rem}
+.num{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(85,214,255,.12);color:var(--cyan);font-weight:900}
+
+.lab{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:stretch}
+.stage{
+  min-height:420px;background:#071321;border-radius:22px;border:1px solid var(--line);position:relative;overflow:hidden;
+}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.btn{
+  border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:rgba(255,255,255,.05);color:white;cursor:pointer;font-weight:700;
+}
+.btn:hover,.btn.active{background:var(--cyan);color:#04111f;border-color:transparent}
+.readout{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.metric{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:13px}
+.metric b{display:block;font-size:1.25rem;color:white}
+.metric small{color:var(--muted)}
+.note{margin-top:15px;padding:13px 14px;border-left:3px solid var(--cyan);background:rgba(85,214,255,.07);border-radius:0 12px 12px 0;color:#cceafa;font-size:.92rem}
+
+/* pulse */
+.radar-tower{position:absolute;left:8%;bottom:12%;width:94px;height:110px}
+.dish{position:absolute;width:72px;height:34px;border:5px solid var(--cyan);border-top:0;border-radius:0 0 72px 72px;transform:rotate(-25deg);top:5px;left:10px;filter:drop-shadow(0 0 8px rgba(85,214,255,.3))}
+.mast{position:absolute;width:5px;height:68px;background:#d7e6f7;left:45px;top:37px;transform:rotate(7deg)}
+.base{position:absolute;bottom:0;left:18px;width:58px;height:10px;background:#d7e6f7;border-radius:7px}
+.storm{position:absolute;right:8%;top:25%;width:170px;height:100px}
+.cloud{position:absolute;inset:20px 0 12px;background:#768aa1;border-radius:60px;box-shadow:38px -24px 0 2px #879bb0,82px -14px 0 8px #70869b,-32px 2px 0 -5px #879bb0}
+.rain{position:absolute;left:20px;right:15px;bottom:-5px;height:42px;background:repeating-linear-gradient(110deg,transparent 0 14px,var(--cyan) 15px 17px,transparent 18px 30px);opacity:.75}
+.pulse{
+  position:absolute;left:18%;top:52%;width:22px;height:22px;border:3px solid var(--cyan);border-radius:50%;opacity:0;
+}
+.pulse.go{animation:outBack 2.8s ease-in-out}
+@keyframes outBack{
+  0%{left:18%;transform:scale(.4);opacity:0}
+  12%{opacity:1}
+  48%{left:72%;transform:scale(1.1);opacity:1;border-color:var(--cyan)}
+  52%{left:72%;border-color:var(--yellow);opacity:1}
+  92%{left:18%;transform:scale(.65);opacity:1;border-color:var(--yellow)}
+  100%{left:18%;opacity:0}
+}
+.distance-line{position:absolute;left:20%;right:25%;top:62%;height:1px;background:rgba(255,255,255,.20)}
+.distance-line:before,.distance-line:after{content:"";position:absolute;top:-4px;width:1px;height:9px;background:rgba(255,255,255,.5)}
+.distance-line:before{left:0}.distance-line:after{right:0}
+.distance-tag{position:absolute;left:46%;top:64%;color:var(--muted);font-size:.82rem}
+
+/* Hydro */
+.hydro-stage{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:24px;align-items:center}
+.hydro{
+  min-height:180px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.035);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.25s;position:relative;overflow:hidden;
+}
+.hydro:hover,.hydro.active{transform:translateY(-4px);border-color:rgba(85,214,255,.6);background:rgba(85,214,255,.075)}
+.hydro-icon{height:70px;width:90px;position:relative;margin-bottom:11px}
+.drop{position:absolute;width:18px;height:26px;border-radius:55% 45% 55% 45%;transform:rotate(45deg);background:var(--cyan)}
+.drop.d1{left:12px;top:20px}.drop.d2{left:38px;top:7px;transform:rotate(45deg) scale(1.35)}.drop.d3{left:64px;top:26px;transform:rotate(45deg) scale(.8)}
+.snowflake{position:absolute;left:34px;top:13px;font-size:44px;color:#d9f2ff;line-height:1}
+.hail{position:absolute;border-radius:50%;background:#e9f4ff;box-shadow:inset -5px -5px 0 #a9c0d5}
+.h1{width:26px;height:26px;left:15px;top:30px}.h2{width:36px;height:36px;left:42px;top:12px}.h3{width:17px;height:17px;left:47px;top:51px}
+.mix{position:absolute;inset:0;background:
+radial-gradient(circle at 25% 55%,var(--cyan) 0 7px,transparent 8px),
+radial-gradient(circle at 62% 35%,#eef8ff 0 13px,transparent 14px),
+radial-gradient(circle at 72% 72%,var(--yellow) 0 8px,transparent 9px),
+radial-gradient(circle at 35% 22%,#eef8ff 0 6px,transparent 7px)}
+.hydro b{font-size:.93rem}
+.beam-scan{position:absolute;left:-30%;top:0;width:28%;height:100%;background:linear-gradient(90deg,transparent,rgba(85,214,255,.18),transparent);transform:skewX(-13deg);animation:scan 4.5s linear infinite;pointer-events:none}
+@keyframes scan{to{left:115%}}
+
+/* Polarization */
+.wave-wrap{height:330px;position:relative;display:grid;place-items:center;perspective:700px}
+.axis{position:absolute;background:rgba(255,255,255,.22)}
+.axis.x{width:78%;height:2px}
+.axis.y{height:72%;width:2px}
+.wave-svg{width:82%;height:80%;overflow:visible}
+#waveH,#waveV{fill:none;stroke-width:4;stroke-linecap:round;stroke-dasharray:9 8;animation:dash 2s linear infinite}
+#waveH{stroke:var(--cyan)}#waveV{stroke:var(--orange)}
+@keyframes dash{to{stroke-dashoffset:-34}}
+.field-label{position:absolute;font-size:.78rem;color:var(--muted);background:#0a1828;border:1px solid var(--line);border-radius:9px;padding:5px 8px}
+.fl-x{right:8%;top:48%}.fl-y{left:51%;top:6%}
+.polar-state{text-align:center;font-weight:800;margin-top:10px}
+.polar-state span{color:var(--cyan)}
+
+/* Doppler */
+.doppler-scene{position:relative;height:330px;overflow:hidden}
+.source{position:absolute;left:8%;top:47%;width:34px;height:34px;border-radius:50%;background:white;box-shadow:0 0 0 9px rgba(85,214,255,.11),0 0 25px rgba(85,214,255,.4)}
+.target{position:absolute;right:13%;top:44%;font-size:42px;transition:.4s transform}
+.wave-ring{position:absolute;left:9.3%;top:51%;border:2px solid rgba(85,214,255,.65);border-radius:50%;width:30px;height:30px;transform:translate(-50%,-50%);animation:ring 2.6s linear infinite}
+.r2{animation-delay:.5s}.r3{animation-delay:1s}.r4{animation-delay:1.5s}
+@keyframes ring{from{width:20px;height:20px;opacity:.9}to{width:590px;height:220px;opacity:0}}
+.sliderbox{margin-top:8px}
+.sliderbox input{width:100%;accent-color:var(--cyan)}
+.velocity-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:.8rem}
+
+/* PPI */
+.ppi-wrap{display:grid;grid-template-columns:1fr .72fr;gap:20px}
+.ppi{
+  width:min(620px,100%);aspect-ratio:1/1;margin:auto;border-radius:50%;position:relative;overflow:hidden;
+  border:1px solid rgba(85,214,255,.35);
+  background:
+   radial-gradient(circle,transparent 0 24.5%,rgba(85,214,255,.15) 25%,transparent 25.5% 49.5%,rgba(85,214,255,.15) 50%,transparent 50.5% 74.5%,rgba(85,214,255,.15) 75%,transparent 75.5%),
+   linear-gradient(90deg,transparent 49.7%,rgba(85,214,255,.14) 50%,transparent 50.3%),
+   linear-gradient(0deg,transparent 49.7%,rgba(85,214,255,.14) 50%,transparent 50.3%),#06111d;
+}
+.ppi-sweep{position:absolute;inset:0;background:conic-gradient(transparent 0 328deg,rgba(85,214,255,.05) 330deg,rgba(85,214,255,.6) 359deg,transparent 360deg);animation:spin 3.2s linear infinite}
+.cell{position:absolute;border-radius:48% 52% 55% 45%;filter:blur(2px);transition:.35s}
+.refl .c1{left:58%;top:21%;width:26%;height:15%;background:radial-gradient(circle at 65% 45%,#ff5d73 0 15%,#ff9f43 18% 35%,#ffd166 38% 55%,#59e6a7 58%)}
+.refl .c2{left:25%;top:61%;width:21%;height:13%;background:radial-gradient(circle,#ffd166 0 22%,#59e6a7 35% 70%,rgba(89,230,167,.25) 72%)}
+.refl .c3{left:62%;top:64%;width:13%;height:9%;background:#59e6a7}
+.velocity .c1{left:52%;top:23%;width:18%;height:28%;background:linear-gradient(90deg,#39d98a 0 48%,#ff5d73 52% 100%);transform:rotate(25deg)}
+.velocity .c2{left:29%;top:58%;width:23%;height:13%;background:linear-gradient(90deg,#39d98a 0 47%,#ff5d73 53% 100%)}
+.velocity .c3{left:65%;top:65%;width:12%;height:10%;background:#ff5d73}
+.classify .c1{left:58%;top:21%;width:26%;height:15%;background:linear-gradient(90deg,#55d6ff,#b388ff)}
+.classify .c2{left:25%;top:61%;width:21%;height:13%;background:#55d6ff}
+.classify .c3{left:62%;top:64%;width:13%;height:9%;background:#eaf6ff}
+.ppi-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:white;box-shadow:0 0 0 6px rgba(85,214,255,.15)}
+.legend{display:grid;gap:11px}
+.legend-item{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);background:rgba(255,255,255,.035);padding:12px;border-radius:13px}
+.swatch{width:13px;height:13px;border-radius:4px;margin-top:5px;flex:0 0 auto}
+
+.flow{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:center}
+.flow-step{padding:15px 10px;text-align:center;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.04);min-height:102px;display:flex;flex-direction:column;justify-content:center}
+.flow-step strong{font-size:.86rem}.flow-step span{font-size:1.7rem;margin-bottom:5px}
+.arrow{text-align:center;color:var(--cyan);font-size:1.45rem}
+
+.references{font-size:.9rem;color:var(--muted)}
+.references li{margin:9px 0}
+footer{border-top:1px solid var(--line);padding:25px 0 45px;color:var(--muted);font-size:.88rem;text-align:center}
+
+@media(max-width:900px){
+  .hero,.lab,.ppi-wrap{grid-template-columns:1fr}
+  .hero{padding-top:45px}
+  .hero-visual{max-width:620px;width:100%;margin:auto}
+  .grid3{grid-template-columns:1fr}
+  .hydro-stage{grid-template-columns:1fr 1fr}
+  .flow{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg)}
+  .navlinks{display:none}
+}
+@media(max-width:520px){
+  h1{font-size:3.3rem}
+  section{padding:60px 0}
+  .hydro-stage{grid-template-columns:1fr}
+  .readout{grid-template-columns:1fr}
+}
+
+/* Enhanced 3D electromagnetic polarization */
+.em3d-stage{
+  min-height:500px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:18px;
+  background:
+    radial-gradient(circle at 22% 18%,rgba(85,214,255,.09),transparent 28%),
+    radial-gradient(circle at 80% 75%,rgba(179,136,255,.07),transparent 28%),
+    #071321;
+}
+.em-title{
+  font-weight:800;
+  letter-spacing:.03em;
+  color:#eef6ff;
+  margin:2px 0 6px 8px;
+}
+.em-svg{
+  width:100%;
+  height:auto;
+  overflow:visible;
+}
+.svg-label{
+  font:700 20px Inter,Segoe UI,Arial,sans-serif;
+  paint-order:stroke;
+  stroke:#071321;
+  stroke-width:6px;
+  stroke-linejoin:round;
+}
+.svg-small{
+  font:600 18px Inter,Segoe UI,Arial,sans-serif;
+  fill:#a9bad0;
+}
+.svg-label.white{fill:#eef6ff}
+.svg-label.cyan{fill:#55d6ff}
+.svg-label.orange{fill:#ff9f43}
+.svg-label.purple{fill:#b388ff}
+#eHorizontal,#eVertical,#bField{
+  transition:opacity .35s ease,stroke-width .35s ease,filter .35s ease;
+  stroke-dasharray:10 8;
+  animation:waveTravel 2.2s linear infinite;
+}
+#bField{animation-duration:2.8s}
+@keyframes waveTravel{to{stroke-dashoffset:-36}}
+.em-mode-indicator{
+  align-self:center;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:9px 13px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.045);
+  color:#dbeaff;
+  font-size:.9rem;
+}
+.mini-dot{
+  width:9px;height:9px;border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 13px currentColor;
+}
+.polar-info{
+  margin-top:18px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+  padding:14px;
+}
+.polar-info b{display:block;color:white;margin-bottom:5px}
+.polar-info span{color:var(--muted);font-size:.93rem}
+
+.filter-panel{
+  margin-top:24px;
+  background:linear-gradient(180deg,rgba(16,34,58,.96),rgba(9,23,40,.96));
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:26px;
+  box-shadow:var(--shadow);
+}
+.compact-head{margin-bottom:22px}
+.compact-head h2{font-size:clamp(1.7rem,3vw,2.45rem)}
+.polarizer-demo{
+  display:grid;
+  grid-template-columns:1fr auto 1.35fr auto 1fr;
+  gap:16px;
+  align-items:center;
+  margin-top:18px;
+}
+.filter-source,.antenna-feed{
+  min-height:160px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:16px;
+}
+.filter-source span,.antenna-feed span,.device-caption{font-size:.82rem;color:var(--muted)}
+.filter-icon{font-size:2.3rem;margin-bottom:8px}
+.filter-arrow{font-size:2rem;color:var(--cyan);font-weight:900}
+.polarizer-device{
+  border:1px solid rgba(85,214,255,.3);
+  border-radius:20px;
+  background:#071321;
+  padding:16px;
+  text-align:center;
+  overflow:hidden;
+}
+.device-label{
+  font-size:.78rem;
+  color:var(--cyan);
+  letter-spacing:.1em;
+  font-weight:900;
+  margin-bottom:12px;
+}
+.device-body{
+  height:150px;
+  position:relative;
+  border-radius:16px;
+  background:
+    linear-gradient(135deg,rgba(85,214,255,.08),rgba(179,136,255,.04)),
+    #0a1929;
+  border:1px solid var(--line);
+  overflow:hidden;
+}
+.slot{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(255,255,255,.15);
+  border-radius:999px;
+  box-shadow:0 0 18px rgba(255,255,255,.08);
+  transition:.3s;
+}
+.slot-h{width:72%;height:8px}
+.slot-v{height:72%;width:8px}
+.device-wave{
+  position:absolute;
+  width:220%;
+  height:220%;
+  left:-60%;
+  top:-60%;
+  background:repeating-radial-gradient(circle at center,
+    transparent 0 16px,
+    rgba(85,214,255,.12) 17px 19px,
+    transparent 20px 34px);
+  animation:filterPulse 2.6s linear infinite;
+}
+@keyframes filterPulse{to{transform:scale(1.08) rotate(8deg)}}
+
+.filter-modes{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.filter-mode{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.035);
+  color:white;
+  border-radius:15px;
+  padding:14px 12px;
+  cursor:pointer;
+  text-align:left;
+  transition:.25s;
+}
+.filter-mode:hover,.filter-mode.active{
+  border-color:rgba(85,214,255,.65);
+  background:rgba(85,214,255,.08);
+  transform:translateY(-2px);
+}
+.filter-mode b,.filter-mode small{display:block}
+.filter-mode small{color:var(--muted);margin-top:3px}
+.f-wave{
+  display:inline-block;
+  width:50px;height:24px;
+  margin-bottom:7px;
+  position:relative;
+}
+.f-wave:before,.f-wave:after{
+  content:"";
+  position:absolute;
+  left:2px;right:2px;top:11px;height:3px;
+  border-radius:999px;
+}
+.f-wave.h:before{background:var(--cyan)}
+.f-wave.v:before{
+  background:var(--orange);
+  transform:rotate(90deg);
+}
+.f-wave.dual:before{background:var(--cyan)}
+.f-wave.dual:after{background:var(--orange);transform:rotate(90deg)}
+
+.filter-result{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:16px;
+}
+.filter-channel{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.028);
+  border-radius:15px;
+  padding:14px;
+  opacity:.25;
+  transition:.3s;
+}
+.filter-channel.active{
+  opacity:1;
+  border-color:rgba(85,214,255,.5);
+  background:rgba(85,214,255,.06);
+}
+.filter-channel span{
+  display:inline-grid;
+  place-items:center;
+  width:30px;height:30px;
+  border-radius:9px;
+  font-weight:900;
+  background:rgba(255,255,255,.08);
+}
+.channel-line{
+  height:5px;
+  border-radius:999px;
+  margin:12px 0 7px;
+  background:linear-gradient(90deg,var(--cyan),transparent);
+  animation:channelFlow 1.8s linear infinite;
+}
+.v-channel .channel-line{background:linear-gradient(90deg,var(--orange),transparent)}
+@keyframes channelFlow{
+  0%{background-position:0 0}
+  100%{background-position:120px 0}
+}
+.filter-note{margin-top:16px}
+
+@media(max-width:900px){
+  .polarizer-demo{grid-template-columns:1fr}
+  .filter-arrow{transform:rotate(90deg);text-align:center}
+}
+@media(max-width:620px){
+  .filter-modes,.filter-result{grid-template-columns:1fr}
+  .em3d-stage{min-height:390px;padding:8px}
+  .svg-label{font-size:16px}
+  .svg-small{font-size:14px}
+}
+
+
+/* Refined dual-polarization visualization */
+.em3d-stage{
+  min-height:520px;
+  padding:22px 18px 16px;
+  background:
+    radial-gradient(circle at 22% 18%,rgba(85,214,255,.075),transparent 27%),
+    radial-gradient(circle at 78% 74%,rgba(255,143,90,.055),transparent 25%),
+    #071321;
+}
+.em-title{
+  font-size:1.02rem;
+  font-weight:800;
+  margin:0 0 4px 8px;
+  color:#f2f8ff;
+}
+.em-svg{width:100%;height:auto;display:block;overflow:visible}
+.prop-axis{
+  stroke:#edf7ff;
+  stroke-width:4.5;
+  opacity:.9;
+}
+.wave-h,.wave-v{
+  fill:none;
+  stroke-width:5.5;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:opacity .32s ease,stroke-width .32s ease;
+  stroke-dasharray:none !important;
+  animation:none !important;
+}
+.wave-h{stroke:#55d6ff}
+.wave-v{stroke:#ff8f5a}
+.transverse-guides line{
+  stroke-width:1.5;
+  stroke-dasharray:5 7;
+}
+.guide-h{stroke:rgba(85,214,255,.22)}
+.guide-v{stroke:rgba(255,143,90,.22)}
+.label-line-h{stroke:#55d6ff;stroke-width:2}
+.label-line-v{stroke:#ff8f5a;stroke-width:2}
+.svg-label{
+  font:700 19px Inter,Segoe UI,Arial,sans-serif;
+  paint-order:stroke;
+  stroke:#071321;
+  stroke-width:6px;
+  stroke-linejoin:round;
+}
+.svg-label.white{fill:#edf7ff}
+.svg-label.cyan{fill:#55d6ff}
+.svg-label.orange{fill:#ff8f5a}
+.svg-small{
+  font:600 16px Inter,Segoe UI,Arial,sans-serif;
+  fill:#9fb3c8;
+}
+
+</style>
+</head>
+<body>
+<nav>
+  <div class="wrap navbar">
+    <div class="brand"><span class="dot"></span> RADAR METEOROLÓGICO</div>
+    <div class="navlinks">
+      <a href="#principio">Principio</a><a href="#eco">Pulso y eco</a><a href="#hidro">Hidrometeoros</a>
+      <a href="#polar">Polarización</a><a href="#doppler">Doppler</a><a href="#ppi">PPI</a>
+    </div>
+  </div>
+</nav>
+
+<header class="wrap hero">
+  <div>
+    
+    <h1>Ver una tormenta <span>sin tocarla.</span></h1>
+    <p class="lead">Un radar meteorológico envía pulsos de ondas electromagnéticas, escucha el eco que regresa y usa esa información para estimar dónde está la precipitación, qué tan intensa es y cómo se mueve.</p>
+    <div class="badges">
+      <span class="badge">Ondas electromagnéticas</span>
+      <span class="badge">Efecto Doppler</span>
+      <span class="badge">Polarización dual</span>
+      <span class="badge">Hidrometeoros</span>
+    </div>
+    <a class="cta" href="#eco">Explorar el radar ↓</a>
+  </div>
+  <div class="hero-visual" aria-label="Radar meteorológico animado">
+    <div class="radar-grid"></div><div class="sweep"></div>
+    <div class="echo e1"></div><div class="echo e2"></div><div class="echo e3"></div>
+    <div class="radar-center"></div>
+    <div class="hero-label">Visualización didáctica · barrido PPI</div>
+  </div>
+</header>
+
+<section id="principio">
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>¿Qué hace realmente un radar meteorológico?</h2>
+      <p>El radar transmite energía en forma de ondas de radio. Cuando esas ondas encuentran gotas, cristales de hielo o granizo, parte de la energía se dispersa y una pequeña fracción vuelve a la antena como <b>eco</b>. El sistema analiza ese eco y lo transforma en información meteorológica.</p>
+    </div>
+    <div class="grid3">
+      <div class="card"><div class="num">1</div><h3>Emite</h3><p>La antena envía pulsos muy breves de energía electromagnética hacia la atmósfera.</p></div>
+      <div class="card"><div class="num">2</div><h3>Recibe el eco</h3><p>Los hidrometeoros dispersan la señal. El tiempo de ida y vuelta permite calcular su distancia.</p></div>
+      <div class="card"><div class="num">3</div><h3>Interpreta</h3><p>La potencia, fase y polarización del eco ayudan a estimar intensidad, movimiento y tipo de precipitación.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="eco">
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>La distancia se mide con tiempo.</h2>
+      <p>Como la onda viaja aproximadamente a la velocidad de la luz, el radar puede medir cuánto tarda el pulso en ir hasta el objetivo y volver. La distancia se obtiene con <b>d = c·Δt / 2</b>; se divide entre dos porque la señal recorre el camino de ida y de regreso.</p>
+    </div>
+    <div class="lab">
+      <div class="stage">
+        <div class="radar-tower"><div class="dish"></div><div class="mast"></div><div class="base"></div></div>
+        <div class="pulse" id="pulse"></div>
+        <div class="storm"><div class="cloud"></div><div class="rain"></div></div>
+        <div class="distance-line"></div><div class="distance-tag">≈ 60 km</div>
+      </div>
+      <div class="card">
+        <h3>Simulador de pulso</h3>
+        <p>Presiona el botón. Verás el pulso salir del radar, alcanzar la tormenta y regresar como eco.</p>
+        <div class="controls"><button class="btn active" id="emitBtn">Emitir pulso</button></div>
+        <div class="readout">
+          <div class="metric"><b id="timeRead">0.40 ms</b><small>tiempo ida + vuelta</small></div>
+          <div class="metric"><b>≈ 60 km</b><small>distancia simulada</small></div>
+        </div>
+        <div class="note">El radar no “ve” la nube como una cámara. Mide energía electromagnética que regresa después de interactuar con los objetivos.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="hidro">
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>No todas las partículas responden igual.</h2>
+      <p>Una gota grande, un copo de nieve y una piedra de granizo tienen tamaños, formas y composiciones distintas. El radar de polarización dual compara la respuesta horizontal y vertical para obtener pistas sobre el tipo de objetivo que produjo el eco.</p>
+    </div>
+    <div class="stage hydro-stage">
+      <div class="beam-scan"></div>
+      <div class="hydro active" data-type="Lluvia" data-h="88" data-v="62" data-msg="Las gotas grandes suelen estar algo achatadas; su dimensión horizontal puede ser mayor que la vertical.">
+        <div class="hydro-icon"><i class="drop d1"></i><i class="drop d2"></i><i class="drop d3"></i></div><b>Lluvia</b>
+      </div>
+      <div class="hydro" data-type="Nieve" data-h="56" data-v="52" data-msg="Los copos tienen formas irregulares y baja densidad; su firma puede diferenciarse de la lluvia líquida.">
+        <div class="hydro-icon"><span class="snowflake">❄</span></div><b>Nieve</b>
+      </div>
+      <div class="hydro" data-type="Granizo" data-h="78" data-v="75" data-msg="El granizo puede producir ecos muy intensos. Su forma suele ser más cercana a una esfera que una gota grande.">
+        <div class="hydro-icon"><i class="hail h1"></i><i class="hail h2"></i><i class="hail h3"></i></div><b>Granizo</b>
+      </div>
+      <div class="hydro" data-type="Mezcla" data-h="70" data-v="58" data-msg="En zonas de fusión pueden coexistir agua, nieve y hielo, generando una respuesta más variada.">
+        <div class="hydro-icon"><div class="mix"></div></div><b>Mezcla</b>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 id="hydroTitle">Lluvia</h3>
+      <p id="hydroText">Las gotas grandes suelen estar algo achatadas; su dimensión horizontal puede ser mayor que la vertical.</p>
+      <div class="readout">
+        <div class="metric"><b id="hResp">88%</b><small>respuesta H · ilustrativa</small></div>
+        <div class="metric"><b id="vResp">62%</b><small>respuesta V · ilustrativa</small></div>
+      </div>
+      <div class="note">Los porcentajes de esta demostración son visuales, no valores operacionales. En un radar real se usan variables como reflectividad diferencial, fase diferencial y coeficiente de correlación.</div>
+    </div>
+  </div>
+</section>
+
+
+<section id="polar">
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>La onda cambia según la orientación del campo eléctrico.</h2>
+      <p>
+        En una onda electromagnética, el campo eléctrico <b>E</b> y el campo magnético <b>B</b>
+        oscilan en direcciones perpendiculares entre sí y también son perpendiculares a la dirección
+        de propagación. En el radar meteorológico se utilizan componentes <b>horizontal (H)</b> y
+        <b>vertical (V)</b>. Al comparar ambas respuestas, el radar obtiene información adicional
+        sobre la forma y el tipo de hidrometeoro.
+      </p>
+    </div>
+
+    <div class="lab">
+      
+<div class="stage em3d-stage">
+  <div class="em-title">Polarización de la onda electromagnética</div>
+
+  <svg id="emWaveSvg" class="em-svg" viewBox="0 0 920 455" role="img"
+       aria-label="Campos eléctricos horizontal y vertical perpendiculares a la dirección de propagación">
+    <defs>
+      <marker id="propArrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto">
+        <path d="M0,0 L0,8 L11,4 z" fill="#edf7ff"/>
+      </marker>
+      <marker id="hArrow" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+        <path d="M0,0 L0,7 L9,3.5 z" fill="#55d6ff"/>
+      </marker>
+      <marker id="vArrow" markerWidth="10" markerHeight="10" refX="8" refY="3.5" orient="auto">
+        <path d="M0,0 L0,7 L9,3.5 z" fill="#ff8f5a"/>
+      </marker>
+      <filter id="softGlow">
+        <feGaussianBlur stdDeviation="3.2" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- subtle guide planes / transverse axes -->
+    <g class="transverse-guides">
+      <line x1="235.9" y1="258.9" x2="258.1" y2="323.1" class="guide-h"/><line x1="278.9" y1="302.8" x2="215.1" y2="279.2" class="guide-v"/>
+<line x1="392.1" y1="205.0" x2="414.3" y2="269.2" class="guide-h"/><line x1="435.1" y1="248.9" x2="371.3" y2="225.3" class="guide-v"/>
+<line x1="548.3" y1="151.1" x2="570.5" y2="215.3" class="guide-h"/><line x1="591.3" y1="195.0" x2="527.5" y2="171.4" class="guide-v"/>
+<line x1="704.5" y1="97.2" x2="726.7" y2="161.4" class="guide-h"/><line x1="747.5" y1="141.1" x2="683.7" y2="117.5" class="guide-v"/>
+    </g>
+
+    <!-- main direction of propagation -->
+    <line x1="105" y1="340" x2="815" y2="95" class="prop-axis" marker-end="url(#propArrow)"/>
+    <text x="684" y="54" class="svg-label white">Dirección de propagación</text>
+
+    <!-- two orthogonal electric-field components -->
+    <polyline id="eHorizontal" points="105.0,340.0 110.1,344.2 115.1,348.3 120.1,352.3 125.0,356.0 129.8,359.5 134.5,362.6 139.0,365.4 143.4,367.6 147.7,369.4 151.7,370.7 155.5,371.3 159.2,371.4 162.6,370.8 165.8,369.7 168.8,367.9 171.6,365.5 174.2,362.5 176.5,358.9 178.7,354.9 180.8,350.3 182.6,345.2 184.4,339.8 186.0,334.1 187.5,328.0 189.0,321.8 190.4,315.4 191.8,309.0 193.2,302.6 194.7,296.3 196.1,290.1 197.7,284.2 199.4,278.5 201.1,273.2 203.1,268.4 205.2,263.9 207.4,260.0 209.9,256.7 212.5,253.9 215.4,251.7 218.4,250.1 221.7,249.1 225.2,248.8 228.9,249.1 232.8,249.9 236.9,251.4 241.2,253.3 245.7,255.8 250.3,258.6 255.0,261.9 259.9,265.5 264.8,269.3 269.8,273.3 274.8,277.5 279.9,281.7 284.9,285.8 290.0,289.9 294.9,293.8 299.8,297.5 304.6,300.9 309.2,303.9 313.7,306.4 318.1,308.6 322.2,310.2 326.2,311.2 330.0,311.7 333.5,311.5 336.9,310.8 340.0,309.4 342.9,307.4 345.7,304.8 348.2,301.6 350.5,297.8 352.6,293.6 354.6,288.8 356.4,283.7 358.1,278.1 359.7,272.3 361.2,266.2 362.7,259.9 364.1,253.5 365.5,247.1 366.9,240.7 368.3,234.4 369.8,228.3 371.4,222.5 373.1,216.9 375.0,211.8 376.9,207.0 379.1,202.8 381.4,199.1 383.9,195.9 386.6,193.3 389.6,191.3 392.7,189.9 396.1,189.2 399.6,189.1 403.4,189.6 407.4,190.6 411.6,192.2 415.9,194.3 420.4,196.9 425.1,199.9 429.8,203.3 434.7,207.0 439.7,210.9 444.7,215.0 449.7,219.2 454.8,223.4 459.8,227.5 464.8,231.5 469.8,235.4 474.6,238.9 479.3,242.2 483.9,245.0 488.4,247.5 492.7,249.4 496.8,250.8 500.7,251.7 504.4,251.9 507.9,251.6 511.1,250.6 514.2,249.0 517.1,246.8 519.7,244.0 522.2,240.6 524.4,236.7 526.5,232.3 528.4,227.4 530.2,222.1 531.9,216.4 533.4,210.5 534.9,204.3 536.3,198.0 537.7,191.6 539.1,185.1 540.5,178.8 542.0,172.6 543.5,166.5 545.2,160.8 546.9,155.4 548.8,150.3 550.8,145.8 553.0,141.7 555.4,138.1 558.0,135.2 560.8,132.8 563.8,131.0 567.0,129.9 570.4,129.3 574.1,129.4 577.9,130.1 582.0,131.3 586.2,133.1 590.6,135.4 595.1,138.2 599.8,141.3 604.7,144.8 609.6,148.6 614.5,152.5 619.6,156.6 624.6,160.8 629.7,165.0 634.7,169.1 639.7,173.1 644.6,176.8 649.4,180.3 654.1,183.4 658.7,186.2 663.0,188.4 667.3,190.2 671.3,191.4 675.1,192.1 678.8,192.1 682.2,191.6 685.4,190.4 688.4,188.6 691.2,186.2 693.7,183.2 696.1,179.6 698.3,175.5 700.3,170.9 702.2,165.8 703.9,160.4 705.6,154.6 707.1,148.6 708.6,142.4 710.0,136.0 711.4,129.6 712.8,123.2 714.2,116.9 715.7,110.7 717.3,104.8 718.9,99.1 720.7,93.9 722.6,89.0 724.7,84.6 727.0,80.7 729.4,77.3 732.1,74.5 735.0,72.4 738.0,70.8 741.3,69.9 744.8,69.5 748.5,69.8 752.4,70.7 756.6,72.1 760.8,74.1 765.3,76.6 769.9,79.4 774.6,82.7 779.5,86.3 784.4,90.1 789.4,94.2 794.5,98.3 799.5,102.5 804.6,106.7 809.6,110.8 814.6,114.7 819.4,118.3 824.2,121.7" class="wave-h" filter="url(#softGlow)"/>
+    <polyline id="eVertical" points="105.0,340.0 103.2,337.0 101.4,334.1 99.8,331.1 98.4,328.3 97.3,325.6 96.5,323.0 96.1,320.5 96.1,318.2 96.6,316.1 97.6,314.1 99.1,312.4 101.2,310.8 103.9,309.5 107.2,308.4 111.0,307.6 115.5,306.9 120.5,306.4 126.0,306.2 132.1,306.1 138.6,306.2 145.6,306.5 152.9,306.9 160.5,307.4 168.4,308.1 176.5,308.8 184.7,309.5 193.0,310.3 201.3,311.0 209.4,311.7 217.5,312.4 225.3,313.0 232.8,313.5 240.0,313.8 246.8,314.1 253.2,314.1 259.1,314.0 264.5,313.7 269.3,313.1 273.5,312.4 277.2,311.5 280.3,310.3 282.8,308.9 284.7,307.3 286.0,305.5 286.8,303.5 287.1,301.3 287.0,298.9 286.4,296.4 285.5,293.7 284.3,291.0 282.8,288.1 281.1,285.2 279.4,282.2 277.5,279.2 275.8,276.2 274.1,273.3 272.5,270.4 271.2,267.6 270.2,264.9 269.5,262.4 269.2,259.9 269.4,257.7 270.0,255.6 271.2,253.7 272.9,252.1 275.2,250.6 278.1,249.4 281.6,248.4 285.7,247.5 290.3,247.0 295.5,246.6 301.2,246.4 307.4,246.4 314.1,246.6 321.2,246.9 328.6,247.3 336.4,247.9 344.3,248.5 352.5,249.2 360.7,250.0 369.0,250.8 377.2,251.5 385.4,252.2 393.3,252.9 401.1,253.4 408.5,253.9 415.6,254.2 422.2,254.3 428.4,254.3 434.2,254.1 439.3,253.8 444.0,253.2 448.0,252.4 451.5,251.3 454.4,250.1 456.6,248.6 458.4,247.0 459.5,245.1 460.2,243.0 460.3,240.7 460.0,238.3 459.3,235.7 458.3,233.1 457.0,230.2 455.4,227.4 453.7,224.4 451.9,221.4 450.1,218.4 448.3,215.5 446.7,212.6 445.2,209.7 444.0,206.9 443.1,204.3 442.5,201.8 442.4,199.4 442.7,197.2 443.5,195.2 444.9,193.4 446.8,191.8 449.3,190.4 452.4,189.2 456.1,188.3 460.3,187.6 465.2,187.1 470.6,186.7 476.5,186.6 482.8,186.7 489.7,186.9 496.9,187.3 504.4,187.8 512.2,188.3 520.3,189.0 528.5,189.7 536.7,190.5 545.0,191.3 553.2,192.0 561.3,192.7 569.2,193.3 576.8,193.8 584.1,194.2 591.1,194.5 597.6,194.6 603.6,194.5 609.2,194.3 614.2,193.8 618.6,193.2 622.4,192.3 625.7,191.2 628.4,189.9 630.5,188.3 632.0,186.6 633.0,184.6 633.4,182.5 633.4,180.2 633.0,177.7 632.2,175.1 631.0,172.3 629.6,169.5 628.0,166.6 626.3,163.6 624.5,160.7 622.7,157.7 620.9,154.7 619.3,151.8 617.9,149.0 616.8,146.2 616.0,143.6 615.6,141.2 615.6,138.9 616.1,136.7 617.1,134.8 618.6,133.1 620.8,131.5 623.5,130.2 626.8,129.1 630.6,128.3 635.1,127.6 640.1,127.2 645.7,126.9 651.8,126.9 658.3,127.0 665.3,127.3 672.6,127.7 680.2,128.2 688.1,128.8 696.2,129.5 704.4,130.2 712.7,131.0 721.0,131.8 729.1,132.5 737.2,133.1 745.0,133.7 752.5,134.2 759.7,134.6 766.5,134.8 772.9,134.8 778.7,134.7 784.1,134.4 788.9,133.9 793.1,133.1 796.8,132.2 799.9,131.0 802.3,129.6 804.2,128.0 805.6,126.2 806.4,124.2 806.7,122.0 806.5,119.6 805.9,117.1 805.0,114.4 803.8,111.6 802.3,108.8 800.6,105.8 798.8,102.9 797.0,99.9 795.2,96.9 793.5,94.0 792.0,91.1 790.7,88.3 789.7,85.6" class="wave-v" filter="url(#softGlow)"/>
+
+    <!-- labels with clean pointers -->
+    <line x1="235" y1="96" x2="275" y2="176" class="label-line-h" marker-end="url(#hArrow)"/>
+    <text x="94" y="73" class="svg-label cyan">Campo eléctrico horizontal (Eₕ)</text>
+
+    <line x1="570" y1="385" x2="546" y2="300" class="label-line-v" marker-end="url(#vArrow)"/>
+    <text x="500" y="421" class="svg-label orange">Campo eléctrico vertical (Eᵥ)</text>
+
+    <text x="286" y="444" class="svg-small">Eₕ ⟂ Eᵥ · ambas componentes son transversales a la propagación</text>
+  </svg>
+
+  <div class="em-mode-indicator">
+    <span class="mini-dot"></span>
+    <span id="emModeText">Polarización horizontal (H)</span>
+  </div>
+</div>
+
+<div class="card">
+        <h3>Selecciona la polarización</h3>
+        <p>
+          Usa los tres modos para observar cómo cambia la orientación del campo eléctrico.
+          Las componentes H y V se muestran en planos perpendiculares entre sí y transversales a la dirección de propagación.
+        </p>
+
+        <div class="controls">
+          <button class="btn active polBtn" data-pol="H">Horizontal H</button>
+          <button class="btn polBtn" data-pol="V">Vertical V</button>
+          <button class="btn polBtn" data-pol="HV">Dual H + V</button>
+        </div>
+
+        <div class="polar-info" id="polarInfo">
+          <b>H · Horizontal</b>
+          <span>El campo eléctrico oscila principalmente en el plano horizontal.</span>
+        </div>
+
+        <div class="note">
+          La polarización se refiere a la orientación del <b>campo eléctrico</b>. En modo dual,
+          el radar trabaja con las componentes H y V y compara los ecos recibidos en ambas.
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-panel">
+      <div class="section-head compact-head">
+        <div class="eyebrow">Filtro de polarización en el radar</div>
+        <h2>¿Cómo se separan H y V dentro del sistema?</h2>
+        <p>
+          De forma simplificada, el radar utiliza una red de alimentación de microondas
+          —por ejemplo, un polarizador o un dispositivo que separa modos ortogonales— para
+          dirigir las componentes horizontal y vertical hacia la antena y, al recibir el eco,
+          llevar cada componente a su canal correspondiente. Esto permite comparar H y V.
+        </p>
+      </div>
+
+      <div class="polarizer-demo">
+        <div class="filter-source">
+          <div class="filter-icon">⚡</div>
+          <strong>Transmisor</strong>
+          <span>Genera el pulso</span>
+        </div>
+
+        <div class="filter-arrow">→</div>
+
+        <div class="polarizer-device">
+          <div class="device-label">POLARIZADOR / SEPARADOR H-V</div>
+          <div class="device-body">
+            <div class="slot slot-h"></div>
+            <div class="slot slot-v"></div>
+            <div class="device-wave"></div>
+          </div>
+          <div class="device-caption">Orienta o separa componentes ortogonales</div>
+        </div>
+
+        <div class="filter-arrow">→</div>
+
+        <div class="antenna-feed">
+          <div class="filter-icon">📡</div>
+          <strong>Antena</strong>
+          <span>Emite / recibe H y V</span>
+        </div>
+      </div>
+
+      <div class="filter-modes">
+        <button class="filter-mode active" data-filter="H">
+          <span class="f-wave h"></span>
+          <b>Modo H</b>
+          <small>Pasa la componente horizontal</small>
+        </button>
+        <button class="filter-mode" data-filter="V">
+          <span class="f-wave v"></span>
+          <b>Modo V</b>
+          <small>Pasa la componente vertical</small>
+        </button>
+        <button class="filter-mode" data-filter="HV">
+          <span class="f-wave dual"></span>
+          <b>Modo Dual</b>
+          <small>Trabaja con H y V</small>
+        </button>
+      </div>
+
+      <div class="filter-result">
+        <div class="filter-channel h-channel active" id="hChannel">
+          <span>H</span>
+          <div class="channel-line"></div>
+          <small>Canal horizontal</small>
+        </div>
+        <div class="filter-channel v-channel" id="vChannel">
+          <span>V</span>
+          <div class="channel-line"></div>
+          <small>Canal vertical</small>
+        </div>
+      </div>
+
+      <div class="note filter-note">
+        En un radar meteorológico real, este proceso ocurre en el sistema de alimentación,
+        guías de onda y electrónica de RF. Aquí se representa como un “filtro” para mostrar
+        visualmente cómo se seleccionan o separan las dos polarizaciones.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="doppler">
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>El eco también cuenta cómo se mueve la tormenta.</h2>
+      <p>El radar Doppler compara la fase de pulsos sucesivos. Ese cambio permite estimar la <b>velocidad radial</b>: qué tan rápido el objetivo se acerca o se aleja en la dirección del haz. No mide directamente todo el movimiento tridimensional del viento con un solo haz.</p>
+    </div>
+    <div class="lab">
+      <div class="stage doppler-scene">
+        <div class="source"></div><div class="wave-ring"></div><div class="wave-ring r2"></div><div class="wave-ring r3"></div><div class="wave-ring r4"></div>
+        <div class="target" id="dopplerTarget">☁️</div>
+      </div>
+      <div class="card">
+        <h3>Velocidad radial simulada</h3>
+        <p>Mueve el control. Los valores negativos representan movimiento hacia el radar y los positivos, alejamiento.</p>
+        <div class="sliderbox">
+          <input id="velSlider" type="range" min="-40" max="40" value="-18" step="1">
+          <div class="velocity-labels"><span>−40 m/s · hacia</span><span>0</span><span>+40 m/s · se aleja</span></div>
+        </div>
+        <div class="readout">
+          <div class="metric"><b id="velRead">−18 m/s</b><small>velocidad radial</small></div>
+          <div class="metric"><b id="motionRead">Se acerca</b><small>respecto al radar</small></div>
+        </div>
+        <div class="note">En productos de velocidad del NWS, normalmente el verde indica movimiento hacia el radar y el rojo movimiento que se aleja.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="ppi">
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>De señales eléctricas a un mapa que un meteorólogo puede leer.</h2>
+      <p>Mientras la antena barre distintos ángulos, el sistema coloca cada eco según su dirección y distancia. El resultado puede representarse en una vista circular tipo PPI. Aquí puedes alternar tres productos didácticos.</p>
+    </div>
+    <div class="ppi-wrap">
+      <div class="ppi refl" id="ppiDisplay">
+        <div class="cell c1"></div><div class="cell c2"></div><div class="cell c3"></div>
+        <div class="ppi-sweep"></div><div class="ppi-center"></div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Producto mostrado</h3>
+          <div class="controls">
+            <button class="btn active ppiBtn" data-mode="refl">Reflectividad</button>
+            <button class="btn ppiBtn" data-mode="velocity">Velocidad</button>
+            <button class="btn ppiBtn" data-mode="classify">Clasificación</button>
+          </div>
+          <div class="legend" id="legend" style="margin-top:18px">
+            <div class="legend-item"><span class="swatch" style="background:#59e6a7"></span><div><b>Eco débil/moderado</b><div class="muted">Menor energía devuelta.</div></div></div>
+            <div class="legend-item"><span class="swatch" style="background:#ffd166"></span><div><b>Eco fuerte</b><div class="muted">Mayor energía devuelta.</div></div></div>
+            <div class="legend-item"><span class="swatch" style="background:#ff5d73"></span><div><b>Eco muy intenso</b><div class="muted">Puede asociarse con precipitación intensa.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      
+      <h2>Así se conecta todo.</h2>
+      <p>El valor tecnológico del radar está en convertir una interacción electromagnética muy rápida en información útil para vigilancia meteorológica, estimación de precipitación y análisis del movimiento de las tormentas.</p>
+    </div>
+    <div class="flow">
+      <div class="flow-step"><span>⚡</span><strong>Transmisor</strong></div><div class="arrow">→</div>
+      <div class="flow-step"><span>📡</span><strong>Antena</strong></div><div class="arrow">→</div>
+      <div class="flow-step"><span>〰️</span><strong>Onda EM</strong></div><div class="arrow">→</div>
+      <div class="flow-step"><span>🌧️</span><strong>Hidrometeoros</strong></div>
+    </div>
+    <div class="flow" style="margin-top:10px">
+      <div class="flow-step"><span>🗺️</span><strong>Mapa radar</strong></div><div class="arrow">←</div>
+      <div class="flow-step"><span>💻</span><strong>Procesamiento</strong></div><div class="arrow">←</div>
+      <div class="flow-step"><span>📥</span><strong>Receptor</strong></div><div class="arrow">←</div>
+      <div class="flow-step"><span>↩️</span><strong>Eco</strong></div>
+    </div>
+  </div>
+</section>
+
+<script>
+const pulse = document.getElementById('pulse');
+document.getElementById('emitBtn').addEventListener('click',()=>{
+  pulse.classList.remove('go'); void pulse.offsetWidth; pulse.classList.add('go');
+  const t=document.getElementById('timeRead'); t.textContent='Midiendo…';
+  setTimeout(()=>t.textContent='0.40 ms',1450);
+});
+
+document.querySelectorAll('.hydro').forEach(el=>{
+  el.addEventListener('click',()=>{
+    document.querySelectorAll('.hydro').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('hydroTitle').textContent=el.dataset.type;
+    document.getElementById('hydroText').textContent=el.dataset.msg;
+    document.getElementById('hResp').textContent=el.dataset.h+'%';
+    document.getElementById('vResp').textContent=el.dataset.v+'%';
+  });
+});
+
+
+
+
+const eH = document.getElementById('eHorizontal');
+const eV = document.getElementById('eVertical');
+const emModeText = document.getElementById('emModeText');
+const polarInfo = document.getElementById('polarInfo');
+
+function setPol(mode){
+  const isH = mode === 'H';
+  const isV = mode === 'V';
+  const isDual = mode === 'HV';
+
+  eH.style.opacity = (isH || isDual) ? '1' : '.10';
+  eV.style.opacity = (isV || isDual) ? '1' : '.10';
+
+  if(isH){
+    eH.style.strokeWidth='6.5';
+    eV.style.strokeWidth='4.5';
+    emModeText.textContent='Polarización horizontal (H)';
+    polarInfo.innerHTML='<b>H · Horizontal</b><span>Se destaca la componente horizontal del campo eléctrico. Su oscilación ocurre en un plano transversal a la dirección de propagación.</span>';
+  }else if(isV){
+    eH.style.strokeWidth='4.5';
+    eV.style.strokeWidth='6.5';
+    emModeText.textContent='Polarización vertical (V)';
+    polarInfo.innerHTML='<b>V · Vertical</b><span>Se destaca la componente vertical del campo eléctrico. Esta componente es perpendicular a H y también transversal a la propagación.</span>';
+  }else{
+    eH.style.strokeWidth='5.8';
+    eV.style.strokeWidth='5.8';
+    emModeText.textContent='Polarización dual (H + V)';
+    polarInfo.innerHTML='<b>Dual · H + V</b><span>Se muestran simultáneamente las dos componentes ortogonales del campo eléctrico para representar la operación de polarización dual.</span>';
+  }
+}
+setPol('H');
+
+document.querySelectorAll('.polBtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.polBtn').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    setPol(btn.dataset.pol);
+  });
+});
+
+const hChannel = document.getElementById('hChannel');
+const vChannel = document.getElementById('vChannel');
+const slotH = document.querySelector('.slot-h');
+const slotV = document.querySelector('.slot-v');
+
+function setFilter(mode){
+  const hOn = mode === 'H' || mode === 'HV';
+  const vOn = mode === 'V' || mode === 'HV';
+
+  hChannel.classList.toggle('active',hOn);
+  vChannel.classList.toggle('active',vOn);
+
+  slotH.style.background = hOn ? 'var(--cyan)' : 'rgba(255,255,255,.12)';
+  slotH.style.boxShadow = hOn ? '0 0 22px rgba(85,214,255,.55)' : 'none';
+
+  slotV.style.background = vOn ? 'var(--orange)' : 'rgba(255,255,255,.12)';
+  slotV.style.boxShadow = vOn ? '0 0 22px rgba(255,159,67,.55)' : 'none';
+
+  setPol(mode);
+  document.querySelectorAll('.polBtn').forEach(x=>{
+    x.classList.toggle('active',x.dataset.pol===mode);
+  });
+}
+setFilter('H');
+
+document.querySelectorAll('.filter-mode').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-mode').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    setFilter(btn.dataset.filter);
+  });
+});
+
+const slider=document.getElementById('velSlider'), velRead=document.getElementById('velRead'), motionRead=document.getElementById('motionRead'), target=document.getElementById('dopplerTarget');
+function updateVel(){
+  const v=Number(slider.value);
+  velRead.textContent=(v>0?'+':v<0?'−':'')+Math.abs(v)+' m/s';
+  motionRead.textContent=v<0?'Se acerca':v>0?'Se aleja':'Sin movimiento radial';
+  motionRead.style.color=v<0?'var(--green)':v>0?'var(--red)':'white';
+  target.style.transform=`translateX(${v*1.35}px)`;
+}
+slider.addEventListener('input',updateVel); updateVel();
+
+const ppi=document.getElementById('ppiDisplay'), legend=document.getElementById('legend');
+const legends={
+ refl:`
+  <div class="legend-item"><span class="swatch" style="background:#59e6a7"></span><div><b>Eco débil/moderado</b><div class="muted">Menor energía devuelta.</div></div></div>
+  <div class="legend-item"><span class="swatch" style="background:#ffd166"></span><div><b>Eco fuerte</b><div class="muted">Mayor energía devuelta.</div></div></div>
+  <div class="legend-item"><span class="swatch" style="background:#ff5d73"></span><div><b>Eco muy intenso</b><div class="muted">Puede asociarse con precipitación intensa.</div></div></div>`,
+ velocity:`
+  <div class="legend-item"><span class="swatch" style="background:#39d98a"></span><div><b>Hacia el radar</b><div class="muted">Velocidad radial entrante.</div></div></div>
+  <div class="legend-item"><span class="swatch" style="background:#ff5d73"></span><div><b>Se aleja</b><div class="muted">Velocidad radial saliente.</div></div></div>
+  <div class="legend-item"><span class="swatch" style="background:#777"></span><div><b>Cerca de cero</b><div class="muted">Poco movimiento en dirección al haz.</div></div></div>`,
+ classify:`
+  <div class="legend-item"><span class="swatch" style="background:#55d6ff"></span><div><b>Lluvia</b><div class="muted">Clase didáctica.</div></div></div>
+  <div class="legend-item"><span class="swatch" style="background:#b388ff"></span><div><b>Mezcla / hielo</b><div class="muted">La clasificación real usa varias variables.</div></div></div>
+  <div class="legend-item"><span class="swatch" style="background:#eef8ff"></span><div><b>Nieve / hielo</b><div class="muted">Representación simplificada.</div></div></div>`
+};
+document.querySelectorAll('.ppiBtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.ppiBtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  ppi.className='ppi '+b.dataset.mode; legend.innerHTML=legends[b.dataset.mode];
+}));
+
+// Dispara una demostración suave al entrar por primera vez en la sección de eco.
+let autoPlayed=false;
+const obs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting && !autoPlayed){autoPlayed=true;document.getElementById('emitBtn').click();}
+},{threshold:.5});
+obs.observe(document.getElementById('eco'));
+</script>
+</body>
+</html>
